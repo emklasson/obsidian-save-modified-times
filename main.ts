@@ -1,0 +1,213 @@
+
+import { Dialog, dialog, DialogData, DialogField } from "dialog";
+import { App, moment, Notice, Plugin, PluginManifest, ToggleComponent } from "obsidian";
+
+interface PluginSettings {
+    modifiedTimes?: {path: string, mtime: number}[];
+}
+
+const DEFAULT_SETTINGS: PluginSettings = {
+}
+
+enum Properties {
+    SavedModifiedTime = "savedModifiedTime",
+}
+
+export default class FluffyThingsPlugin extends Plugin {
+    settings: PluginSettings;
+
+    constructor(app: App, manifest: PluginManifest) {
+        super(app, manifest);
+    }
+
+    async onload() {
+        await this.loadSettings();
+
+        this.addCommand({
+            id: "save-modified-time",
+            name: "Save current note's last modified time",
+            callback: () => this.saveLastModifiedTime()
+        });
+        this.addCommand({
+            id: "restore-modified-time",
+            name: "Restore current note's last modified time",
+            callback: () => this.restoreLastModifiedTime()
+        });
+        this.addCommand({
+            id: "save-all-modified-times",
+            name: "Save all last modified times",
+            callback: () => this.saveAllModifiedTimes()
+        });
+        this.addCommand({
+            id: "restore-all-modified-times",
+            name: "Restore last modified times",
+            callback: () => this.restoreAllModifiedTimes()
+        });
+    }
+
+    async loadSettings() {
+        this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    }
+
+    async saveSettings() {
+        await this.saveData(this.settings);
+    }
+
+    getCurrentFile() {
+        return this.app.workspace.getActiveFile();
+    }
+
+    dateStringFromTimestamp(timestamp: number) {
+        return moment.unix(timestamp / 1000).format("YYYY-MM-DD HH:mm:ss");
+    }
+
+    async restoreLastModifiedTime() {
+        const file = this.getCurrentFile();
+        if (!file) {
+            return;
+        }
+
+        try {
+            await this.app.fileManager.processFrontMatter(file, (fm) => {
+                if (!fm.hasOwnProperty(Properties.SavedModifiedTime)) {
+                    new Notice("No last modified time saved. Skipping.");
+                    return;
+                }
+
+                this.app.vault.append(file, "", {mtime: fm[Properties.SavedModifiedTime]});
+                const date = this.dateStringFromTimestamp(fm[Properties.SavedModifiedTime]);
+                new Notice(`Restored last modified time:\n  [[${file.basename}]]\n  ${date}`);
+            });
+        } catch (error) {
+            new Notice(error);
+        }
+    }
+
+    async saveLastModifiedTime() {
+        const file = this.getCurrentFile();
+        if (!file) {
+            return;
+        }
+
+        try {
+            let mtime;
+            await this.app.fileManager.processFrontMatter(file, (fm) => {
+                fm[Properties.SavedModifiedTime] = file.stat.mtime;
+                mtime = file.stat.mtime;
+                const date = this.dateStringFromTimestamp(fm[Properties.SavedModifiedTime]);
+                new Notice(`Saved last modified time:\n  [[${file.basename}]]\n  ${date}`);
+            });
+            this.app.vault.append(file, "", {mtime: mtime});
+        } catch (error) {
+            new Notice(error);
+        }
+    }
+
+    // Sort root paths first by prepending a slash.
+    fixSortPath(a: string) {
+        return a.contains("/") ? a : `/${a}`;
+    }
+
+    async restoreAllModifiedTimes() {
+        const fields: DialogData = {};
+        const mtimes: Record<string, number> = {};
+        this.settings.modifiedTimes?.sort(
+            (a, b) => this.fixSortPath(a.path).localeCompare(this.fixSortPath(b.path))
+        ).forEach(note => {
+            const file = this.app.vault.getFileByPath(note.path);
+            if (!file || file.stat.mtime == note.mtime) {
+                return;
+            }
+
+            mtimes[note.path] = note.mtime;
+
+            fields[note.path] = {
+                type: "toggle",
+                desc: this.dateStringFromTimestamp(file.stat.mtime)
+                    + " → " + this.dateStringFromTimestamp(note.mtime),
+            };
+        });
+        if (Object.keys(fields).length == 0) {
+            fields["No times have changed."] = {
+                type: "label",
+            };
+            fields["OK"] = {
+                type: "button",
+                cta: true,
+                key: "enter",
+            };
+        } else {
+            fields["Uncheck all"] = {
+                type: "button",
+                close: false,
+                onClick: (result: DialogData, dlg: Dialog) => {
+                    SetAllToggles(false);
+                },
+            };
+            fields["Check all"] = {
+                type: "button",
+                sameLine: true,
+                close: false,
+                onClick: (result: DialogData, dlg: Dialog) => {
+                    SetAllToggles(true);
+                },
+            };
+            fields["Cancel"] = {
+                type: "button",
+            };
+            fields["Restore"] = {
+                type: "button",
+                sameLine: true,
+                cta: true,
+                close: false,
+                onClick: (result: DialogData, dlg: Dialog) => {
+                    let empty = true;
+                    for (const [key, value] of Object.entries<DialogField>(fields)) {
+                        if (value.type == "toggle" && value.value) {
+                            empty = false;
+                            const file = this.app.vault.getFileByPath(key);
+                            if (!file) {
+                                new Notice(`Error opening file: ${key}`);
+                            } else {
+                                this.app.vault.append(file, "", {mtime: mtimes[key]});
+                            }
+                        }
+                    }
+
+                    if (empty) {
+                        new Notice("No notes selected.");
+                    } else {
+                        dlg.close();
+                    }
+                },
+            };
+        }
+
+        dialog(
+            this.app,
+            "Restore modified times",
+            fields,
+        )
+
+        function SetAllToggles(checked: boolean) {
+            for (const value of Object.values<DialogField>(fields)) {
+                if (value.type == "toggle") {
+                    (value.components?.[0] as ToggleComponent).setValue(checked);
+                }
+            }
+        }
+    }
+
+    async saveAllModifiedTimes() {
+        this.settings.modifiedTimes = [];
+        this.app.vault.getMarkdownFiles().forEach(file => {
+            this.settings.modifiedTimes?.push({
+                path: file.path,
+                mtime: file.stat.mtime,
+            });
+        });
+
+        this.saveSettings();
+        new Notice("Saved all notes' modified times.");
+    }
+}
