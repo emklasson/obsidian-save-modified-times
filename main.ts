@@ -189,8 +189,8 @@ export default class FluffyThingsPlugin extends Plugin {
         dialog(
             this.app,
             "Restore modified times",
-            fields,
-        )
+            fields
+        );
 
         function SetAllToggles(checked: boolean) {
             for (const value of Object.values<DialogField>(fields)) {
