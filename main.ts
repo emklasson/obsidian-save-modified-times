@@ -25,12 +25,12 @@ export default class FluffyThingsPlugin extends Plugin {
 
         this.addCommand({
             id: "save-modified-time",
-            name: "Save current note's last modified time",
+            name: "Save current note's last modified time to property",
             callback: () => this.saveLastModifiedTime()
         });
         this.addCommand({
             id: "restore-modified-time",
-            name: "Restore current note's last modified time",
+            name: "Restore current note's last modified time from property",
             callback: () => this.restoreLastModifiedTime()
         });
         this.addCommand({
