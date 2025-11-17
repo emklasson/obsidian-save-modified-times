@@ -162,6 +162,7 @@ export default class FluffyThingsPlugin extends Plugin {
                 close: false,
                 onClick: (result: DialogData, dlg: Dialog) => {
                     let empty = true;
+                    let restored = 0;
                     for (const [key, value] of Object.entries<DialogField>(fields)) {
                         if (value.type == "toggle" && value.value) {
                             empty = false;
@@ -170,6 +171,7 @@ export default class FluffyThingsPlugin extends Plugin {
                                 new Notice(`Error opening file: ${key}`);
                             } else {
                                 this.app.vault.append(file, "", {mtime: mtimes[key]});
+                                restored++;
                             }
                         }
                     }
@@ -177,6 +179,7 @@ export default class FluffyThingsPlugin extends Plugin {
                     if (empty) {
                         new Notice("No notes selected.");
                     } else {
+                        new Notice(`Restored ${restored} modifed time${restored == 1 ? "" : "s"}.`);
                         dlg.close();
                     }
                 },
