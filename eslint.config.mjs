@@ -19,7 +19,7 @@ export default defineConfig([globalIgnores(["**/node_modules/", "**/main.js"]), 
     extends: compat.extends(
         "eslint:recommended",
         "plugin:@typescript-eslint/eslint-recommended",
-        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/recommended-type-checked",
     ),
 
     plugins: {
@@ -34,6 +34,9 @@ export default defineConfig([globalIgnores(["**/node_modules/", "**/main.js"]), 
         parser: tsParser,
         ecmaVersion: 5,
         sourceType: "module",
+        parserOptions: {
+            projectService: true,
+        },
     },
 
     rules: {
@@ -44,7 +47,11 @@ export default defineConfig([globalIgnores(["**/node_modules/", "**/main.js"]), 
         }],
 
         "@typescript-eslint/ban-ts-comment": "off",
-        "no-prototype-builtins": "off",
         "@typescript-eslint/no-empty-function": "off",
+        "@typescript-eslint/no-unsafe-member-access": "off",
+        "@typescript-eslint/no-unsafe-assignment": "off",
+        "@typescript-eslint/no-unsafe-argument": "off",
+        "@typescript-eslint/no-floating-promises": "error",
+        "no-prototype-builtins": "error",
     },
 }]);
