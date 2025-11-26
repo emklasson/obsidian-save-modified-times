@@ -9,7 +9,7 @@ export interface DialogField {
     height?: string;
     infoWidth?: string;
     key?: string;
-    onClick?: (result: DialogData, dialog: Dialog) => Promise<void>;
+    onClick?: (result: DialogData, dialog: Dialog) => void | Promise<void>;
     sameLine?: boolean;
     text?: string;
     textAlign?: string;

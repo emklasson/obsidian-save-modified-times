@@ -70,7 +70,7 @@ export default class FluffyThingsPlugin extends Plugin {
         try {
             let mtime = file.stat.mtime;
             await this.app.fileManager.processFrontMatter(file, (fm) => {
-                if (!fm.hasOwnProperty(Properties.SavedModifiedTime)) {
+                if (!Object.prototype.hasOwnProperty.call(fm, Properties.SavedModifiedTime)) {
                     new Notice("No last modified time saved. Skipping.");
                     return;
                 }
@@ -142,7 +142,7 @@ export default class FluffyThingsPlugin extends Plugin {
             fields["Uncheck all"] = {
                 type: "button",
                 close: false,
-                onClick: async (result: DialogData, dlg: Dialog) => {
+                onClick: (result: DialogData, dlg: Dialog) => {
                     SetAllToggles(false);
                 },
             };
@@ -150,7 +150,7 @@ export default class FluffyThingsPlugin extends Plugin {
                 type: "button",
                 sameLine: true,
                 close: false,
-                onClick: async (result: DialogData, dlg: Dialog) => {
+                onClick: (result: DialogData, dlg: Dialog) => {
                     SetAllToggles(true);
                 },
             };
