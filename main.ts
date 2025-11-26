@@ -68,16 +68,18 @@ export default class FluffyThingsPlugin extends Plugin {
         }
 
         try {
+            let mtime = file.stat.mtime;
             await this.app.fileManager.processFrontMatter(file, (fm) => {
                 if (!fm.hasOwnProperty(Properties.SavedModifiedTime)) {
                     new Notice("No last modified time saved. Skipping.");
                     return;
                 }
 
-                this.app.vault.append(file, "", {mtime: fm[Properties.SavedModifiedTime]});
+                mtime = fm[Properties.SavedModifiedTime];
                 const date = this.dateStringFromTimestamp(fm[Properties.SavedModifiedTime]);
                 new Notice(`Restored last modified time:\n  [[${file.basename}]]\n  ${date}`);
             });
+            await this.app.vault.append(file, "", {mtime: mtime});
         } catch (error) {
             new Notice(error);
         }
@@ -90,14 +92,14 @@ export default class FluffyThingsPlugin extends Plugin {
         }
 
         try {
-            let mtime;
-            await this.app.fileManager.processFrontMatter(file, (fm) => {
-                fm[Properties.SavedModifiedTime] = file.stat.mtime;
-                mtime = file.stat.mtime;
-                const date = this.dateStringFromTimestamp(fm[Properties.SavedModifiedTime]);
-                new Notice(`Saved last modified time:\n  [[${file.basename}]]\n  ${date}`);
-            });
-            this.app.vault.append(file, "", {mtime: mtime});
+            await this.app.fileManager.processFrontMatter(
+                file,
+                (fm) => {
+                    fm[Properties.SavedModifiedTime] = file.stat.mtime;
+                    const date = this.dateStringFromTimestamp(fm[Properties.SavedModifiedTime]);
+                    new Notice(`Saved last modified time:\n  [[${file.basename}]]\n  ${date}`);
+                },
+                {mtime: file.stat.mtime});
         } catch (error) {
             new Notice(error);
         }
@@ -108,7 +110,7 @@ export default class FluffyThingsPlugin extends Plugin {
         return a.contains("/") ? a : `/${a}`;
     }
 
-    async restoreAllModifiedTimes() {
+    restoreAllModifiedTimes() {
         const fields: DialogData = {};
         const mtimes: Record<string, number> = {};
         this.settings.modifiedTimes?.sort(
@@ -140,7 +142,7 @@ export default class FluffyThingsPlugin extends Plugin {
             fields["Uncheck all"] = {
                 type: "button",
                 close: false,
-                onClick: (result: DialogData, dlg: Dialog) => {
+                onClick: async (result: DialogData, dlg: Dialog) => {
                     SetAllToggles(false);
                 },
             };
@@ -148,7 +150,7 @@ export default class FluffyThingsPlugin extends Plugin {
                 type: "button",
                 sameLine: true,
                 close: false,
-                onClick: (result: DialogData, dlg: Dialog) => {
+                onClick: async (result: DialogData, dlg: Dialog) => {
                     SetAllToggles(true);
                 },
             };
@@ -160,7 +162,7 @@ export default class FluffyThingsPlugin extends Plugin {
                 sameLine: true,
                 cta: true,
                 close: false,
-                onClick: (result: DialogData, dlg: Dialog) => {
+                onClick: async (result: DialogData, dlg: Dialog) => {
                     let empty = true;
                     let restored = 0;
                     for (const [key, value] of Object.entries<DialogField>(fields)) {
@@ -170,7 +172,7 @@ export default class FluffyThingsPlugin extends Plugin {
                             if (!file) {
                                 new Notice(`Error opening file: ${key}`);
                             } else {
-                                this.app.vault.append(file, "", {mtime: mtimes[key]});
+                                await this.app.vault.append(file, "", {mtime: mtimes[key]});
                                 restored++;
                             }
                         }
@@ -210,7 +212,7 @@ export default class FluffyThingsPlugin extends Plugin {
             });
         });
 
-        this.saveSettings();
+        await this.saveSettings();
         new Notice("Saved all notes' modified times.");
     }
 }

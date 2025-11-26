@@ -9,7 +9,7 @@ export interface DialogField {
     height?: string;
     infoWidth?: string;
     key?: string;
-    onClick?: (result: DialogData, dialog: Dialog) => void;
+    onClick?: (result: DialogData, dialog: Dialog) => Promise<void>;
     sameLine?: boolean;
     text?: string;
     textAlign?: string;
@@ -87,11 +87,11 @@ export class Dialog extends Modal {
                 break;
 
             case "button": {
-                const onButtonClick = () => {
+                const onButtonClick = async () => {
                     if (props?.close ?? true) {
                         this.close();
                     }
-                    props.onClick?.(fields, this);
+                    await props.onClick?.(fields, this);
                 };
                 setting.addButton((btn) => {
                     btn.setButtonText(field)
@@ -100,12 +100,12 @@ export class Dialog extends Modal {
                         btn.setCta();
                     }
                     if (props?.key) {
-                        this.scope.register([], props.key, (evt) => {
+                        this.scope.register([], props.key, async (evt) => {
                             if (evt.isComposing) {
                                 return;
                             }
                             evt.preventDefault();
-                            onButtonClick();
+                            await onButtonClick();
                         });
                     }
                 });
