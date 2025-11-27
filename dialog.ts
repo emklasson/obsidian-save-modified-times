@@ -63,8 +63,6 @@ export class Dialog extends Modal {
 
             fields[field].components = setting.components;
 
-            // setting.settingEl.style.borderTopWidth = "0";
-
             setting.controlEl.style.width = "80%";
             switch (type) {
             case "text":
@@ -129,11 +127,6 @@ export class Dialog extends Modal {
             }
 
             setting.infoEl.style.textAlign = props?.textAlign ?? "";
-        }
-
-        // Remove horizontal bar spacers.
-        for (const el of Array.from(this.contentEl.querySelectorAll<HTMLElement>(".setting-item"))) {
-            el.style.borderTopWidth = "0";
         }
     }
 
