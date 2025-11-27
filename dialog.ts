@@ -7,7 +7,6 @@ export interface DialogField {
     cta?: boolean;
     desc?: string;
     height?: string;
-    infoWidth?: string;
     key?: string;
     onClick?: (result: DialogData, dialog: Dialog) => void | Promise<void>;
     sameLine?: boolean;
@@ -20,7 +19,7 @@ export interface DialogField {
 export type DialogData = Record<string, DialogField>
 
 export interface DialogSettings {
-    width?: string;
+    wide?: boolean;
 }
 
 export class Dialog extends Modal {
@@ -29,7 +28,9 @@ export class Dialog extends Modal {
 
         this.setTitle(title);
 
-        this.modalEl.style.width = settings?.width ?? "";
+        if (settings?.wide) {
+            this.modalEl.addClass("mklasson-dialog-wide");
+        }
 
         let setting;
 
@@ -45,7 +46,6 @@ export class Dialog extends Modal {
             const type = props?.type ?? "text";
             const value = props?.text ?? "";
             const desc = props?.desc ?? "";
-            const height = type != "text" ? null : props?.height || (value.contains("\n") && "80px");
             const textInitialiser = (text: TextComponent | TextAreaComponent) => {
                 text.onChange((value) => {
                     fields[field].value = value;
@@ -63,24 +63,21 @@ export class Dialog extends Modal {
 
             fields[field].components = setting.components;
 
-            setting.controlEl.style.width = "80%";
             switch (type) {
             case "text":
+            case "textArea":
+                setting.controlEl.addClass("mklasson-text-control");
                 setting.setName(field);
-                setting.infoEl.style.width = props?.infoWidth ?? "20%";
-                if (height) {
+                setting.infoEl.addClass("mklasson-text-info");
+                if (type == "textArea" || props?.height || value.contains("\n")) {
                     setting.addTextArea(textInitialiser);
-                    const textArea = setting.controlEl.querySelector("textarea");
-                    if (textArea) {
-                        textArea.style.width = "100%";
-                        textArea.style.height = height;
+                    setting.controlEl.querySelector("textarea")?.addClass("mklasson-textarea");
+                    if (props?.height) {
+                        setting.controlEl.querySelector("textarea")?.setCssProps({"height": props.height});
                     }
                 } else {
                     setting.addText(textInitialiser);
-                    const input = setting.controlEl.querySelector("input");
-                    if (input) {
-                        input.style.width = "100%";
-                    }
+                    setting.controlEl.querySelector("input")?.addClass("mklasson-text-wide");
                 }
                 break;
 
@@ -112,13 +109,11 @@ export class Dialog extends Modal {
 
             case "label":
                 setting.setName(field);
-                setting.infoEl.style.width = props?.infoWidth ?? "100%";
-                setting.controlEl.style.width = "";
+                setting.infoEl.addClass("mklasson-label");
                 break;
 
             case "toggle":
                 setting.setName(field);
-                setting.controlEl.style.width = "";
                 setting.addToggle(toggle => {
                     toggle.onChange(value => fields[field].value = value);
                     toggle.setValue(true);
@@ -126,7 +121,9 @@ export class Dialog extends Modal {
                 break;
             }
 
-            setting.infoEl.style.textAlign = props?.textAlign ?? "";
+            if (props?.textAlign) {
+                setting.infoEl.addClass(`mklasson-align-${props.textAlign}`);
+            }
         }
     }
 

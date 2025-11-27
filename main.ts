@@ -1,4 +1,3 @@
-
 import { Dialog, dialog, DialogData, DialogField } from "dialog";
 import { App, moment, Notice, Plugin, PluginManifest, ToggleComponent } from "obsidian";
 

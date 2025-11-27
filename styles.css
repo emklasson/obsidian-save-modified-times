@@ -1,8 +1,37 @@
-/*
+.mklasson-dialog-wide {
+    width: calc(min(800px, 95%));
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.mklasson-label {
+    width: 100%;
+    margin-inline-end: 0px !important;
+}
 
-If your plugin does not need CSS, delete this file.
+.mklasson-text-info {
+    width: 20%;
+}
 
-*/
+.mklasson-text-control {
+    width: 80%;
+}
+
+.mklasson-text-wide {
+    width: 100%;
+}
+
+.mklasson-align-left {
+    text-align: left;
+}
+
+.mklasson-align-center {
+    text-align: center;
+}
+
+.mklasson-align-right {
+    text-align: right;
+}
+
+textarea.mklasson-textarea {
+    width: 100%;
+    height: 5rem;
+}
