@@ -3,9 +3,11 @@ import { App, moment, Notice, Plugin, PluginManifest, ToggleComponent } from "ob
 
 interface PluginSettings {
     modifiedTimes?: {path: string, mtime: number}[];
+    askForSaveConfirmation: boolean;
 }
 
 const DEFAULT_SETTINGS: PluginSettings = {
+    askForSaveConfirmation: true,
 }
 
 enum Properties {
@@ -203,6 +205,34 @@ export default class FluffyThingsPlugin extends Plugin {
     }
 
     async saveAllModifiedTimes() {
+        if (this.settings.askForSaveConfirmation) {
+            dialog(
+                this.app,
+                "Confirm save all modified times",
+                {
+                    "Are you sure you want to save all notes' modified times?": {
+                        type: "label",
+                    },
+
+                    "Cancel": {
+                        type: "button",
+                    },
+                    "Save": {
+                        type: "button",
+                        cta: true,
+                        sameLine: true,
+                        onClick: async (result: DialogData, dlg: Dialog) => {
+                            await this.saveAllModifiedTimesForce();
+                        },
+                    },
+                }
+            );
+        } else {
+            await this.saveAllModifiedTimesForce();
+        }
+    }
+
+    async saveAllModifiedTimesForce() {
         this.settings.modifiedTimes = [];
         this.app.vault.getMarkdownFiles().forEach(file => {
             this.settings.modifiedTimes?.push({
