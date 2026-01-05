@@ -14,7 +14,7 @@ enum Properties {
     SavedModifiedTime = "savedModifiedTime",
 }
 
-export default class FluffyThingsPlugin extends Plugin {
+export default class SaveModifiedTimesPlugin extends Plugin {
     settings: PluginSettings;
 
     constructor(app: App, manifest: PluginManifest) {
