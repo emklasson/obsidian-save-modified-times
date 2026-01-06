@@ -1,13 +1,13 @@
 import { Dialog, dialog, DialogData, DialogField } from "dialog";
-import { App, moment, Notice, Plugin, PluginManifest, ToggleComponent } from "obsidian";
+import { App, moment, Notice, Plugin, PluginManifest, PluginSettingTab, Setting, TFile, ToggleComponent } from "obsidian";
 
 interface PluginSettings {
     modifiedTimes?: {path: string, mtime: number}[];
-    askForSaveConfirmation: boolean;
+    saveConfirmationAll: boolean;
 }
 
 const DEFAULT_SETTINGS: PluginSettings = {
-    askForSaveConfirmation: true,
+    saveConfirmationAll: true,
 }
 
 enum Properties {
@@ -44,6 +44,8 @@ export default class SaveModifiedTimesPlugin extends Plugin {
             name: "Restore last modified times",
             callback: () => this.restoreAllModifiedTimes()
         });
+
+        this.addSettingTab(new SettingTab(this.app, this));
     }
 
     async loadSettings() {
@@ -205,12 +207,12 @@ export default class SaveModifiedTimesPlugin extends Plugin {
     }
 
     async saveAllModifiedTimes() {
-        if (this.settings.askForSaveConfirmation) {
+        if (this.settings.saveConfirmationAll) {
             dialog(
                 this.app,
-                "Confirm save all modified times",
+                "Save confirmation",
                 {
-                    "Are you sure you want to save all notes' modified times?": {
+                    "Save all notes' modified times?": {
                         type: "label",
                     },
 
@@ -244,4 +246,33 @@ export default class SaveModifiedTimesPlugin extends Plugin {
         await this.saveSettings();
         new Notice("Saved all notes' modified times.");
     }
+}
+
+class SettingTab extends PluginSettingTab {
+    plugin: SaveModifiedTimesPlugin;
+
+    constructor(app: App, plugin: SaveModifiedTimesPlugin) {
+        super(app, plugin);
+        this.plugin = plugin;
+    }
+
+    display(): void {
+        const {containerEl} = this;
+
+        containerEl.empty();
+
+        new Setting(containerEl)
+            .setName('Save confirmation')
+
+        new Setting(containerEl)
+            .setName('All files')
+            .setDesc('Ask for confirmation before saving (overwriting) all files\' times.')
+            .addToggle(toggle => {
+                toggle.setValue(this.plugin.settings.saveConfirmationAll)
+                    .onChange(async (value) => {
+                        this.plugin.settings.saveConfirmationAll = value;
+                        await this.plugin.saveSettings();
+                    });
+            });
+
 }
