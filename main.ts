@@ -4,10 +4,12 @@ import { App, moment, Notice, Plugin, PluginManifest, PluginSettingTab, Setting,
 interface PluginSettings {
     modifiedTimes?: {path: string, mtime: number}[];
     saveConfirmationAll: boolean;
+    saveConfirmationCurrentProperty: boolean;
 }
 
 const DEFAULT_SETTINGS: PluginSettings = {
     saveConfirmationAll: true,
+    saveConfirmationCurrentProperty: false,
 }
 
 enum Properties {
@@ -94,6 +96,35 @@ export default class SaveModifiedTimesPlugin extends Plugin {
             return;
         }
 
+        if (this.settings.saveConfirmationCurrentProperty) {
+            dialog(
+                this.app,
+                "Save confirmation",
+                {
+                    "dummy": {
+                        type: "label",
+                        text: `Save current note's modified time to the '${Properties.SavedModifiedTime}' property?`,
+                    },
+
+                    "Cancel": {
+                        type: "button",
+                    },
+                    "Save": {
+                        type: "button",
+                        cta: true,
+                        sameLine: true,
+                        onClick: async (result: DialogData, dlg: Dialog) => {
+                            await this.saveLastModifiedTimeForce(file);
+                        },
+                    },
+                }
+            );
+        } else {
+            await this.saveLastModifiedTimeForce(file);
+        }
+    }
+
+    async saveLastModifiedTimeForce(file: TFile) {
         try {
             await this.app.fileManager.processFrontMatter(
                 file,
@@ -275,4 +306,15 @@ class SettingTab extends PluginSettingTab {
                     });
             });
 
+        new Setting(containerEl)
+            .setName('Current file to property')
+            .setDesc(`Ask for confirmation before saving (overwriting) the current file\'s time to the '${Properties.SavedModifiedTime}' property.`)
+            .addToggle(toggle => {
+                toggle.setValue(this.plugin.settings.saveConfirmationCurrentProperty)
+                    .onChange(async (value) => {
+                        this.plugin.settings.saveConfirmationCurrentProperty = value;
+                        await this.plugin.saveSettings();
+                    });
+            });
+        }
 }
