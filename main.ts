@@ -29,12 +29,12 @@ export default class SaveModifiedTimesPlugin extends Plugin {
         this.addCommand({
             id: "save-modified-time",
             name: "Save current note's last modified time to property",
-            callback: () => this.saveLastModifiedTime()
+            callback: () => this.saveCurrentModifiedTimeProperty()
         });
         this.addCommand({
             id: "restore-modified-time",
             name: "Restore current note's last modified time from property",
-            callback: () => this.restoreLastModifiedTime()
+            callback: () => this.restoreCurrentModifiedTimeProperty()
         });
         this.addCommand({
             id: "save-all-modified-times",
@@ -66,7 +66,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
         return moment.unix(timestamp / 1000).format("YYYY-MM-DD HH:mm:ss");
     }
 
-    async restoreLastModifiedTime() {
+    async restoreCurrentModifiedTimeProperty() {
         const file = this.getCurrentFile();
         if (!file) {
             return;
@@ -90,7 +90,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
         }
     }
 
-    async saveLastModifiedTime() {
+    async saveCurrentModifiedTimeProperty() {
         const file = this.getCurrentFile();
         if (!file) {
             return;
@@ -114,17 +114,17 @@ export default class SaveModifiedTimesPlugin extends Plugin {
                         cta: true,
                         sameLine: true,
                         onClick: async (result: DialogData, dlg: Dialog) => {
-                            await this.saveLastModifiedTimeForce(file);
+                            await this.saveCurrentModifiedTimePropertyForce(file);
                         },
                     },
                 }
             );
         } else {
-            await this.saveLastModifiedTimeForce(file);
+            await this.saveCurrentModifiedTimePropertyForce(file);
         }
     }
 
-    async saveLastModifiedTimeForce(file: TFile) {
+    async saveCurrentModifiedTimePropertyForce(file: TFile) {
         try {
             await this.app.fileManager.processFrontMatter(
                 file,
