@@ -108,7 +108,7 @@ export class Dialog extends Modal {
             }
 
             case "label":
-                setting.setName(field);
+                setting.setName(props?.text ?? field);
                 setting.infoEl.addClass("mklasson-label");
                 break;
 
