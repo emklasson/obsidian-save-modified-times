@@ -348,7 +348,7 @@ class SettingTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('All files')
-            .setDesc('Ask for confirmation before saving (overwriting) all files\' times.')
+            .setDesc('Ask for confirmation when saving (overwriting) all files\' times.')
             .addToggle(toggle => {
                 toggle.setValue(this.plugin.settings.saveConfirmationAll)
                     .onChange(async (value) => {
@@ -370,7 +370,7 @@ class SettingTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Current file to property')
-            .setDesc(`Ask for confirmation before saving (overwriting) the current file\'s time to the '${Properties.SavedModifiedTime}' property.`)
+            .setDesc(`Ask for confirmation when saving (overwriting) the current file\'s time to the '${Properties.SavedModifiedTime}' property.`)
             .addToggle(toggle => {
                 toggle.setValue(this.plugin.settings.saveConfirmationCurrentProperty)
                     .onChange(async (value) => {
