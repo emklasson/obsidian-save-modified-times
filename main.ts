@@ -191,6 +191,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
             };
             fields["Cancel"] = {
                 type: "button",
+                desc: "Restore times for selected notes.",
             };
             fields["Restore"] = {
                 type: "button",
