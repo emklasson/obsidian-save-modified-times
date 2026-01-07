@@ -4,12 +4,14 @@ import { App, moment, Notice, Plugin, PluginManifest, PluginSettingTab, Setting,
 interface PluginSettings {
     modifiedTimes: Record<string, number>;
     saveConfirmationAll: boolean;
+    saveConfirmationRestorePopup: boolean;
     saveConfirmationCurrentProperty: boolean;
 }
 
 const DEFAULT_SETTINGS: PluginSettings = {
     modifiedTimes: {},
     saveConfirmationAll: true,
+    saveConfirmationRestorePopup: true,
     saveConfirmationCurrentProperty: false,
 }
 
@@ -195,9 +197,35 @@ export default class SaveModifiedTimesPlugin extends Plugin {
                 cta: true,
                 close: false,
                 onClick: async (result: DialogData, dlg: Dialog) => {
-                    if (await SaveOrRestoreFiles(this, true)) {
-                        await this.saveSettings();
-                        dlg.close();
+                    if (this.settings.saveConfirmationRestorePopup) {
+                        dialog(
+                            this.app,
+                            "Save confirmation",
+                            {
+                                "Overwrite saved times with current times for selected notes?": {
+                                    type: "label",
+                                },
+                                "Cancel": {
+                                    type: "button",
+                                },
+                                "Save": {
+                                    type: "button",
+                                    cta: true,
+                                    sameLine: true,
+                                    onClick: async (result: DialogData, dlg: Dialog) => {
+                                        if (await SaveOrRestoreFiles(this, true)) {
+                                            await this.saveSettings();
+                                            dlg.close();
+                                        }
+                                    },
+                                },
+                            }
+                        );
+                    } else {
+                        if (await SaveOrRestoreFiles(this, true)) {
+                            await this.saveSettings();
+                            dlg.close();
+                        }
                     }
                 },
             };
