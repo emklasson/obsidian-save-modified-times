@@ -212,20 +212,14 @@ export default class SaveModifiedTimesPlugin extends Plugin {
                                     type: "button",
                                     cta: true,
                                     sameLine: true,
-                                    onClick: async (result: DialogData, dlg: Dialog) => {
-                                        if (await SaveOrRestoreFiles(this, true)) {
-                                            await this.saveSettings();
-                                            dlg.close();
-                                        }
+                                    onClick: async (result: DialogData, _: Dialog) => {
+                                        await SaveSelectedFiles(this, dlg);
                                     },
                                 },
                             }
                         );
                     } else {
-                        if (await SaveOrRestoreFiles(this, true)) {
-                            await this.saveSettings();
-                            dlg.close();
-                        }
+                        await SaveSelectedFiles(this, dlg);
                     }
                 },
             };
@@ -251,6 +245,13 @@ export default class SaveModifiedTimesPlugin extends Plugin {
             "Restore modified times",
             fields
         );
+
+        async function SaveSelectedFiles(plugin: SaveModifiedTimesPlugin, dlg: Dialog) {
+            if (await SaveOrRestoreFiles(plugin, true)) {
+                await plugin.saveSettings();
+                dlg.close();
+            }
+        }
 
         async function SaveOrRestoreFiles(plugin: SaveModifiedTimesPlugin, save: boolean) : Promise<boolean> {
             let noneSelected = true;
