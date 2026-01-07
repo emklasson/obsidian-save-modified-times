@@ -358,6 +358,17 @@ class SettingTab extends PluginSettingTab {
             });
 
         new Setting(containerEl)
+            .setName('In Restore popup')
+            .setDesc('Ask for confirmation when using Save in Restore popup.')
+            .addToggle(toggle => {
+                toggle.setValue(this.plugin.settings.saveConfirmationRestorePopup)
+                    .onChange(async (value) => {
+                        this.plugin.settings.saveConfirmationRestorePopup = value;
+                        await this.plugin.saveSettings();
+                    });
+            });
+
+        new Setting(containerEl)
             .setName('Current file to property')
             .setDesc(`Ask for confirmation before saving (overwriting) the current file\'s time to the '${Properties.SavedModifiedTime}' property.`)
             .addToggle(toggle => {
