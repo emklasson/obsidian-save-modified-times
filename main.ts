@@ -2,12 +2,13 @@ import { Dialog, dialog, DialogData, DialogField } from "dialog";
 import { App, moment, Notice, Plugin, PluginManifest, PluginSettingTab, Setting, TFile, ToggleComponent } from "obsidian";
 
 interface PluginSettings {
-    modifiedTimes?: {path: string, mtime: number}[];
+    modifiedTimes: Record<string, number>;
     saveConfirmationAll: boolean;
     saveConfirmationCurrentProperty: boolean;
 }
 
 const DEFAULT_SETTINGS: PluginSettings = {
+    modifiedTimes: {},
     saveConfirmationAll: true,
     saveConfirmationCurrentProperty: false,
 }
@@ -147,20 +148,20 @@ export default class SaveModifiedTimesPlugin extends Plugin {
     restoreAllModifiedTimes() {
         const fields: DialogData = {};
         const mtimes: Record<string, number> = {};
-        this.settings.modifiedTimes?.sort(
-            (a, b) => this.fixSortPath(a.path).localeCompare(this.fixSortPath(b.path))
-        ).forEach(note => {
-            const file = this.app.vault.getFileByPath(note.path);
-            if (!file || file.stat.mtime == note.mtime) {
+        Object.entries(this.settings.modifiedTimes).sort(
+            (a, b) => this.fixSortPath(a[0]).localeCompare(this.fixSortPath(b[0]))
+        ).forEach(([path, mtime]) => {
+            const file = this.app.vault.getFileByPath(path);
+            if (!file || file.stat.mtime == mtime) {
                 return;
             }
 
-            mtimes[note.path] = note.mtime;
+            mtimes[path] = mtime;
 
-            fields[note.path] = {
+            fields[path] = {
                 type: "toggle",
                 desc: this.dateStringFromTimestamp(file.stat.mtime)
-                    + " → " + this.dateStringFromTimestamp(note.mtime),
+                    + " → " + this.dateStringFromTimestamp(mtime),
             };
         });
         if (Object.keys(fields).length == 0) {
@@ -266,12 +267,9 @@ export default class SaveModifiedTimesPlugin extends Plugin {
     }
 
     async saveAllModifiedTimesForce() {
-        this.settings.modifiedTimes = [];
+        this.settings.modifiedTimes = {};
         this.app.vault.getMarkdownFiles().forEach(file => {
-            this.settings.modifiedTimes?.push({
-                path: file.path,
-                mtime: file.stat.mtime,
-            });
+            this.settings.modifiedTimes[file.path] = file.stat.mtime;
         });
 
         await this.saveSettings();
