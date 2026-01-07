@@ -174,14 +174,14 @@ export default class SaveModifiedTimesPlugin extends Plugin {
                 key: "enter",
             };
         } else {
-            fields["Uncheck all"] = {
+            fields["Deselect all"] = {
                 type: "button",
                 close: false,
                 onClick: (result: DialogData, dlg: Dialog) => {
                     SetAllToggles(false);
                 },
             };
-            fields["Check all"] = {
+            fields["Select all"] = {
                 type: "button",
                 sameLine: true,
                 close: false,
