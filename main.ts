@@ -189,6 +189,18 @@ export default class SaveModifiedTimesPlugin extends Plugin {
                     SetAllToggles(true);
                 },
             };
+            fields["Save"] = {
+                type: "button",
+                desc: "Overwrite saved times with current times for selected notes.",
+                cta: true,
+                close: false,
+                onClick: async (result: DialogData, dlg: Dialog) => {
+                    if (await SaveOrRestoreFiles(this, true)) {
+                        await this.saveSettings();
+                        dlg.close();
+                    }
+                },
+            };
             fields["Cancel"] = {
                 type: "button",
                 desc: "Restore times for selected notes.",
@@ -199,25 +211,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
                 cta: true,
                 close: false,
                 onClick: async (result: DialogData, dlg: Dialog) => {
-                    let empty = true;
-                    let restored = 0;
-                    for (const [key, value] of Object.entries<DialogField>(fields)) {
-                        if (value.type == "toggle" && value.value) {
-                            empty = false;
-                            const file = this.app.vault.getFileByPath(key);
-                            if (!file) {
-                                new Notice(`Error opening file: ${key}`);
-                            } else {
-                                await this.app.vault.append(file, "", {mtime: mtimes[key]});
-                                restored++;
-                            }
-                        }
-                    }
-
-                    if (empty) {
-                        new Notice("No notes selected.");
-                    } else {
-                        new Notice(`Restored ${restored} modifed time${restored == 1 ? "" : "s"}.`);
+                    if (await SaveOrRestoreFiles(this, false)) {
                         dlg.close();
                     }
                 },
@@ -229,6 +223,35 @@ export default class SaveModifiedTimesPlugin extends Plugin {
             "Restore modified times",
             fields
         );
+
+        async function SaveOrRestoreFiles(plugin: SaveModifiedTimesPlugin, save: boolean) : Promise<boolean> {
+            let noneSelected = true;
+            let count = 0;
+            for (const [key, value] of Object.entries<DialogField>(fields)) {
+                if (value.type == "toggle" && value.value) {
+                    noneSelected = false;
+                    const file = plugin.app.vault.getFileByPath(key);
+                    if (!file) {
+                        new Notice(`Error opening file: ${key}`);
+                    } else {
+                        if (save) {
+                            plugin.settings.modifiedTimes[file.path] = file.stat.mtime;
+                        } else {
+                            await plugin.app.vault.append(file, "", {mtime: mtimes[key]});
+                        }
+                        count++;
+                    }
+                }
+            }
+
+            if (noneSelected) {
+                new Notice("No notes selected.");
+            } else {
+                new Notice(`${save ? "Saved" : "Restored"} ${count} modified time${count == 1 ? "" : "s"}.`);
+            }
+
+            return count > 0;
+        }
 
         function SetAllToggles(checked: boolean) {
             for (const value of Object.values<DialogField>(fields)) {
