@@ -30,6 +30,16 @@ export default class SaveModifiedTimesPlugin extends Plugin {
         await this.loadSettings();
 
         this.addCommand({
+            id: "save-modified-time-current",
+            name: "Save current note's last modified time",
+            callback: () => this.saveCurrentModifiedTime()
+        });
+        this.addCommand({
+            id: "restore-modified-time-current",
+            name: "Restore current note's last modified time",
+            callback: () => this.restoreCurrentModifiedTime()
+        });
+        this.addCommand({
             id: "save-modified-time",
             name: "Save current note's last modified time to property",
             callback: () => this.saveCurrentModifiedTimeProperty()
@@ -67,6 +77,33 @@ export default class SaveModifiedTimesPlugin extends Plugin {
 
     dateStringFromTimestamp(timestamp: number) {
         return moment.unix(timestamp / 1000).format("YYYY-MM-DD HH:mm:ss");
+    }
+
+    async restoreCurrentModifiedTime() {
+        const file = this.getCurrentFile();
+        if (!file) {
+            return;
+        }
+
+        const mtime = this.settings.modifiedTimes[file.path];
+        if (!mtime) {
+            new Notice("No last modified time saved. Skipping.");
+            return;
+        }
+
+        await this.app.vault.append(file, "", {mtime: mtime});
+        new Notice(`Restored last modified time:\n${this.dateStringFromTimestamp(mtime)}`);
+    }
+
+    async saveCurrentModifiedTime() {
+        const file = this.getCurrentFile();
+        if (!file) {
+            return;
+        }
+
+        this.settings.modifiedTimes[file.path] = file.stat.mtime;
+        await this.saveSettings();
+        new Notice(`Saved last modified time:\n${this.dateStringFromTimestamp(file.stat.mtime)}`);
     }
 
     async restoreCurrentModifiedTimeProperty() {
