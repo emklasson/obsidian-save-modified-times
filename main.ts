@@ -370,7 +370,7 @@ class SettingTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Current file to property')
-            .setDesc(`Ask for confirmation when saving (overwriting) the current file\'s time to the '${Properties.SavedModifiedTime}' property.`)
+            .setDesc(`Ask for confirmation when saving (overwriting) the current file's time to the '${Properties.SavedModifiedTime}' property.`)
             .addToggle(toggle => {
                 toggle.setValue(this.plugin.settings.saveConfirmationCurrentProperty)
                     .onChange(async (value) => {
