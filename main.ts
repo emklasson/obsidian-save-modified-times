@@ -5,6 +5,7 @@ interface PluginSettings {
     modifiedTimes: Record<string, number>;
     saveConfirmationAll: boolean;
     saveConfirmationRestorePopup: boolean;
+    saveConfirmationCurrent: boolean;
     saveConfirmationCurrentProperty: boolean;
 }
 
@@ -12,6 +13,7 @@ const DEFAULT_SETTINGS: PluginSettings = {
     modifiedTimes: {},
     saveConfirmationAll: true,
     saveConfirmationRestorePopup: true,
+    saveConfirmationCurrent: false,
     saveConfirmationCurrentProperty: false,
 }
 
@@ -101,6 +103,34 @@ export default class SaveModifiedTimesPlugin extends Plugin {
             return;
         }
 
+        if (this.settings.saveConfirmationCurrent) {
+            dialog(
+                this.app,
+                "Save confirmation",
+                {
+                    "Save current note's modified time?": {
+                        type: "label",
+                    },
+
+                    "Cancel": {
+                        type: "button",
+                    },
+                    "Save": {
+                        type: "button",
+                        cta: true,
+                        sameLine: true,
+                        onClick: async (result: DialogData, dlg: Dialog) => {
+                            await this.saveCurrentModifiedTimeForce(file);
+                        },
+                    },
+                }
+            );
+        } else {
+            await this.saveCurrentModifiedTimeForce(file);
+        }
+    }
+
+    async saveCurrentModifiedTimeForce(file: TFile) {
         this.settings.modifiedTimes[file.path] = file.stat.mtime;
         await this.saveSettings();
         new Notice(`Saved last modified time:\n${this.dateStringFromTimestamp(file.stat.mtime)}`);
@@ -401,6 +431,17 @@ class SettingTab extends PluginSettingTab {
                 toggle.setValue(this.plugin.settings.saveConfirmationRestorePopup)
                     .onChange(async (value) => {
                         this.plugin.settings.saveConfirmationRestorePopup = value;
+                        await this.plugin.saveSettings();
+                    });
+            });
+
+        new Setting(containerEl)
+            .setName('Current file')
+            .setDesc(`Ask for confirmation when saving (overwriting) the current file's time.`)
+            .addToggle(toggle => {
+                toggle.setValue(this.plugin.settings.saveConfirmationCurrent)
+                    .onChange(async (value) => {
+                        this.plugin.settings.saveConfirmationCurrent = value;
                         await this.plugin.saveSettings();
                     });
             });
