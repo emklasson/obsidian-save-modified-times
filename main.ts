@@ -193,7 +193,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
             };
             fields["Save"] = {
                 type: "button",
-                desc: "Overwrite saved times with current times for selected notes.",
+                desc: "Overwrite saved times with current modified times.",
                 cta: true,
                 close: false,
                 onClick: async (result: DialogData, dlg: Dialog) => {
@@ -202,7 +202,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
                             this.app,
                             "Save confirmation",
                             {
-                                "Overwrite saved times with current times for selected notes?": {
+                                "Overwrite saved times with current modified times for selected notes?": {
                                     type: "label",
                                 },
                                 "Cancel": {
@@ -225,7 +225,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
             };
             fields["Cancel"] = {
                 type: "button",
-                desc: "Restore times for selected notes.",
+                desc: "Restore modified times.",
             };
             fields["Restore"] = {
                 type: "button",
