@@ -412,6 +412,7 @@ class SettingTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Save confirmation')
+            .setHeading();
 
         new Setting(containerEl)
             .setName('All files')
