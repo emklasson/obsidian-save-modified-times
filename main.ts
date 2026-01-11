@@ -7,6 +7,7 @@ interface PluginSettings {
     saveConfirmationRestorePopup: boolean;
     saveConfirmationCurrent: boolean;
     saveConfirmationCurrentProperty: boolean;
+    excludedPaths: string[];
 }
 
 const DEFAULT_SETTINGS: PluginSettings = {
@@ -15,6 +16,7 @@ const DEFAULT_SETTINGS: PluginSettings = {
     saveConfirmationRestorePopup: true,
     saveConfirmationCurrent: false,
     saveConfirmationCurrentProperty: false,
+    excludedPaths: [],
 }
 
 enum Properties {
@@ -411,6 +413,88 @@ class SettingTab extends PluginSettingTab {
         containerEl.empty();
 
         new Setting(containerEl)
+            .setName('Excluded paths');
+
+        new Setting(containerEl)
+            .setDesc('Vault path prefixes of files to exclude when saving/restoring times. '
+                + 'Any matching file will be ignored, except when using the commands for current note.')
+
+        for (let i = 0; i < this.plugin.settings.excludedPaths.length; i++) {
+            const index = i;
+            new Setting(containerEl)
+                .addText(text => {
+                    text
+                        .setValue(this.plugin.settings.excludedPaths[index])
+                        .onChange(async (value) => {
+                            this.plugin.settings.excludedPaths[index] = value;
+                            await this.plugin.saveSettings();
+                        });
+                })
+                .setDesc(`Excluded path prefix #${index + 1}. Matches ${this.countMatches(this.plugin.settings.excludedPaths[index])} files.`)
+                .addExtraButton(button => {
+                    button.setIcon('cross')
+                        .setTooltip('Remove this path')
+                        .onClick(async () => {
+                            this.plugin.settings.excludedPaths.splice(index, 1);
+                            await this.plugin.saveSettings();
+                            this.display();
+                        });
+                })
+                .addExtraButton(button => {
+                    button.setIcon('search')
+                        .setTooltip('Show matches')
+                        .onClick(async () => {
+                            const matches = this.plugin.app.vault.getMarkdownFiles().filter(file => file.path.startsWith(this.plugin.settings.excludedPaths[index]))
+                                .sort((a, b) => this.plugin.fixSortPath(a.path).localeCompare(this.plugin.fixSortPath(b.path)));
+                            const maxMatches = 1000;
+                            if (matches.length > maxMatches) {
+                                dialog(
+                                    this.plugin.app,
+                                    `More than ${maxMatches} matches`,
+                                    {
+                                        "dummy": {
+                                            type: "label",
+                                            text: `Showing all ${matches.length} matches may cause performance issues.`,
+                                        },
+                                        "Cancel": {
+                                            type: "button",
+                                        },
+                                        "Show anyway": {
+                                            type: "button",
+                                            cta: true,
+                                            sameLine: true,
+                                            onClick: async (result: DialogData, dlg: Dialog) => {
+                                                dlg.close();
+                                                this.showMatches(this.plugin.settings.excludedPaths[index], matches);
+                                            }
+                                        },
+                                    });
+                            } else {
+                                this.showMatches(this.plugin.settings.excludedPaths[index], matches);
+                            }
+                        });
+                })
+                .addExtraButton(button => {
+                    button.setIcon('refresh-cw')
+                        .setTooltip('Refresh match count')
+                        .onClick(async () => {
+                            this.display();
+                        });
+                });
+        }
+
+        new Setting(containerEl)
+            .addButton(button => {
+                button.setButtonText('Add excluded path')
+                    .setCta()
+                    .onClick(async () => {
+                        this.plugin.settings.excludedPaths.push('');
+                        await this.plugin.saveSettings();
+                        this.display();
+                    });
+            });
+
+        new Setting(containerEl)
             .setName('Save confirmation')
             .setHeading();
 
@@ -457,5 +541,40 @@ class SettingTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     });
             });
+    }
+
+    showMatches(prefix : string, matches: TFile[]): void {
+        const fields: DialogData = {};
+        if (matches.length == 0) {
+            fields["No matches."] = {
+                type: "label",
+            };
+        } else {
+            fields[`${matches.length} matches`] = {
+                type: "textArea",
+                height: "20em",
+                text: matches.map(file => file.path).join('\n'),
+            };
         }
+        fields["OK"] = {
+            type: "button",
+            cta: true,
+            key: "enter",
+        };
+        dialog(
+            this.plugin.app,
+            `Matches for prefix '${prefix}'`,
+            fields
+        );
+    }
+
+    countMatches(prefix: string): number {
+        let count = 0;
+        this.plugin.app.vault.getMarkdownFiles().forEach(file => {
+            if (file.path.startsWith(prefix)) {
+                count++;
+            }
+        });
+        return count;
+    }
 }
