@@ -63,8 +63,29 @@ export default class SaveModifiedTimesPlugin extends Plugin {
             name: "Restore last modified times",
             callback: () => this.restoreAllModifiedTimes()
         });
+        this.addCommand({
+            id: "add-note-to-excluded-paths",
+            name: "Add current note to excluded paths",
+            callback: () => this.addNoteToExcludedPaths()
+        });
 
         this.addSettingTab(new SettingTab(this.app, this));
+    }
+
+    addNoteToExcludedPaths() {
+        const file = this.getCurrentFile();
+        if (!file) {
+            return;
+        }
+
+        if (this.settings.excludedPaths.includes(file.path)) {
+            new Notice("Note is already in excluded paths.");
+            return;
+        }
+
+        this.settings.excludedPaths.push(file.path);
+        this.saveSettings();
+        new Notice("Note added to excluded paths.");
     }
 
     async loadSettings() {

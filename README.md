@@ -28,6 +28,10 @@ Saves all notes' last modified times to the plugin's settings. Any existing save
 
 Restores all or some of the last modified times that have changed from the times saved in the plugin's settings. A popup is shown where you can select which notes to restore time for. You can also update the saved times for selected notes in this popup.
 
+### Add current note to excluded paths
+
+Adds the full path of the current note to the list of excluded path prefixes (see Settings section).
+
 ## Settings
 
 The plugin's Settings tab has options for various save confirmation prompts.
