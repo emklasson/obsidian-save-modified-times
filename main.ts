@@ -223,7 +223,9 @@ export default class SaveModifiedTimesPlugin extends Plugin {
             (a, b) => this.fixSortPath(a[0]).localeCompare(this.fixSortPath(b[0]))
         ).forEach(([path, mtime]) => {
             const file = this.app.vault.getFileByPath(path);
-            if (!file || file.stat.mtime == mtime) {
+            if (!file
+                || file.stat.mtime == mtime
+                || this.matchesAnyExcludedPath(file)) {
                 return;
             }
 
@@ -389,13 +391,18 @@ export default class SaveModifiedTimesPlugin extends Plugin {
     }
 
     async saveAllModifiedTimesForce() {
-        this.settings.modifiedTimes = {};
         this.app.vault.getMarkdownFiles().forEach(file => {
-            this.settings.modifiedTimes[file.path] = file.stat.mtime;
+            if (!this.matchesAnyExcludedPath(file)) {
+                this.settings.modifiedTimes[file.path] = file.stat.mtime;
+            }
         });
 
         await this.saveSettings();
         new Notice("Saved all notes' modified times.");
+    }
+
+    matchesAnyExcludedPath(file: TFile): boolean {
+        return this.settings.excludedPaths.some(prefix => file.path.startsWith(prefix));
     }
 }
 
