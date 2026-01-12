@@ -8,6 +8,11 @@ interface PluginSettings {
     saveConfirmationCurrent: boolean;
     saveConfirmationCurrentProperty: boolean;
     excludedPaths: string[];
+    autoUpdateTimeEnabled: boolean;
+    autoUpdateTime: string;
+    autoUpdateExistingFiles: boolean;
+    autoUpdateNewFiles: boolean;
+    autoUpdateOnLoad: boolean;
 }
 
 const DEFAULT_SETTINGS: PluginSettings = {
@@ -17,6 +22,11 @@ const DEFAULT_SETTINGS: PluginSettings = {
     saveConfirmationCurrent: false,
     saveConfirmationCurrentProperty: false,
     excludedPaths: [],
+    autoUpdateTimeEnabled: false,
+    autoUpdateTime: "03:00",
+    autoUpdateExistingFiles: true,
+    autoUpdateNewFiles: true,
+    autoUpdateOnLoad: false,
 }
 
 enum Properties {
@@ -439,6 +449,70 @@ class SettingTab extends PluginSettingTab {
         const {containerEl} = this;
 
         containerEl.empty();
+
+        new Setting(containerEl)
+            .setName('Auto-update')
+            .setHeading();
+
+        new Setting(containerEl)
+            .setDesc('Settings for automatically saving the modified times of notes.');
+
+        new Setting(containerEl)
+            .setName('Once a day')
+            .addToggle(toggle => {
+                toggle
+                    .setValue(this.plugin.settings.autoUpdateTimeEnabled)
+                    .onChange(async (value) => {
+                        this.plugin.settings.autoUpdateTimeEnabled = value;
+                        await this.plugin.saveSettings();
+                    });
+            })
+            .addText(text => {
+                text
+                    .setPlaceholder('HH:mm')
+                    .setValue(this.plugin.settings.autoUpdateTime)
+                    .onChange(async (value) => {
+                        this.plugin.settings.autoUpdateTime = value;
+                        await this.plugin.saveSettings();
+                    });
+            })
+            .setDesc('At local time of day (24-hour format, e.g. 03:00), or as soon as possible after that.');
+
+        new Setting(containerEl)
+            .setName('On load')
+            .setDesc('When Obsidian starts or the plugin is loaded.')
+            .addToggle(toggle => {
+                toggle
+                    .setValue(this.plugin.settings.autoUpdateOnLoad)
+                    .onChange(async (value) => {
+                        this.plugin.settings.autoUpdateOnLoad = value;
+                        await this.plugin.saveSettings();
+                    });
+            });
+
+        new Setting(containerEl)
+            .setName('Save new files')
+            .setDesc('Save the modified times of newly created files.')
+            .addToggle(toggle => {
+                toggle
+                    .setValue(this.plugin.settings.autoUpdateNewFiles)
+                    .onChange(async (value) => {
+                        this.plugin.settings.autoUpdateNewFiles = value;
+                        await this.plugin.saveSettings();
+                    });
+            });
+
+        new Setting(containerEl)
+            .setName('Update existing files')
+            .setDesc('Update the modified times of existing files.')
+            .addToggle(toggle => {
+                toggle
+                    .setValue(this.plugin.settings.autoUpdateExistingFiles)
+                    .onChange(async (value) => {
+                        this.plugin.settings.autoUpdateExistingFiles = value;
+                        await this.plugin.saveSettings();
+                    });
+            });
 
         new Setting(containerEl)
             .setName('Excluded paths')
