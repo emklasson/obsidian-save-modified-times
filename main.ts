@@ -441,7 +441,8 @@ class SettingTab extends PluginSettingTab {
         containerEl.empty();
 
         new Setting(containerEl)
-            .setName('Excluded paths');
+            .setName('Excluded paths')
+            .setHeading();
 
         new Setting(containerEl)
             .setDesc('Vault path prefixes of files to exclude when saving/restoring times. '
