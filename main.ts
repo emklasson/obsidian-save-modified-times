@@ -82,7 +82,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
         this.addSettingTab(new SettingTab(this.app, this));
     }
 
-    addNoteToExcludedPaths() {
+    async addNoteToExcludedPaths() {
         const file = this.getCurrentFile();
         if (!file) {
             return;
@@ -94,7 +94,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
         }
 
         this.settings.excludedPaths.push(file.path);
-        this.saveSettings();
+        await this.saveSettings();
         new Notice("Note added to excluded paths.");
     }
 
@@ -546,7 +546,7 @@ class SettingTab extends PluginSettingTab {
                 .addExtraButton(button => {
                     button.setIcon('search')
                         .setTooltip('Show matches')
-                        .onClick(async () => {
+                        .onClick(() => {
                             const matches = this.plugin.app.vault.getMarkdownFiles().filter(file => file.path.startsWith(this.plugin.settings.excludedPaths[index]))
                                 .sort((a, b) => this.plugin.fixSortPath(a.path).localeCompare(this.plugin.fixSortPath(b.path)));
                             const maxMatches = 1000;
@@ -566,7 +566,7 @@ class SettingTab extends PluginSettingTab {
                                             type: "button",
                                             cta: true,
                                             sameLine: true,
-                                            onClick: async (result: DialogData, dlg: Dialog) => {
+                                            onClick: (result: DialogData, dlg: Dialog) => {
                                                 dlg.close();
                                                 this.showMatches(this.plugin.settings.excludedPaths[index], matches);
                                             }
@@ -580,7 +580,7 @@ class SettingTab extends PluginSettingTab {
                 .addExtraButton(button => {
                     button.setIcon('refresh-cw')
                         .setTooltip('Refresh match count')
-                        .onClick(async () => {
+                        .onClick(() => {
                             this.display();
                         });
                 });
