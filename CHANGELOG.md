@@ -1,5 +1,9 @@
 # Changelog
 
+- ## 1.2.0 (2026-01-13)
+    - Added settings to exclude notes matching certain path prefixes from saving/restoring. Exclusions don't apply when using the commands to save/restore only the current note.
+    - Added command to add current note to excluded paths.
+
 - ## 1.1.0 (2026-01-09)
 	- Added optional save confirmations and a Settings tab.
 	- Added Save button in Restore popup for easy selective saving.
