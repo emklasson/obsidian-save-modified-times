@@ -472,6 +472,11 @@ class SettingTab extends PluginSettingTab {
                     .setPlaceholder('HH:mm')
                     .setValue(this.plugin.settings.autoUpdateTime)
                     .onChange(async (value) => {
+                        if (!value.match(/^([01]\d|2[0-3]):([0-5]\d)$/)) {
+                            text.inputEl.addClass('mklasson-setting-error');
+                            return;
+                        }
+                        text.inputEl.removeClass('mklasson-setting-error');
                         this.plugin.settings.autoUpdateTime = value;
                         await this.plugin.saveSettings();
                     });
