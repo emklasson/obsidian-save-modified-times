@@ -1,7 +1,7 @@
 {
 	"id": "save-modified-times",
 	"name": "Save Modified Times (mtime)",
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"minAppVersion": "1.4.4",
 	"description": "Save and restore notes' last modified times (mtime).",
 	"author": "Mikael Klasson",
