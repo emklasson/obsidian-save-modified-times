@@ -1,5 +1,8 @@
 # Changelog
 
+- ## 1.2.1 (2026-01-15)
+	- Fix ReviewBot's UI capitalisation complaints.
+
 - ## 1.2.0 (2026-01-13)
     - Added settings to exclude notes matching certain path prefixes from saving/restoring. Exclusions don't apply when using the commands to save/restore only the current note.
     - Added command to add current note to excluded paths.
