@@ -539,8 +539,8 @@ class SettingTab extends PluginSettingTab {
             });
 
         new Setting(containerEl)
-            .setName('In Restore popup')
-            .setDesc('Ask for confirmation when using Save in Restore popup.')
+            .setName('In the restore popup')
+            .setDesc('Ask for confirmation when saving in the restore popup.')
             .addToggle(toggle => {
                 toggle.setValue(this.plugin.settings.saveConfirmationRestorePopup)
                     .onChange(async (value) => {
