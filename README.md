@@ -38,6 +38,8 @@ The plugin's Settings tab has options for various save confirmation prompts.
 
 You can also define excluded path prefixes. All notes matching any of these are excluded when saving all notes and using the Restore popup. The commands operating only on the current note still save/restore regardless of exclusions.
 
+There are also settings for if and when to automatically update saved times. It can be done once a day at a set time and/or when the plugin loads.
+
 ## Usage
 
 Install and enable the plugin and then run the provided commands from the command palette, or set up hotkeys for them.
