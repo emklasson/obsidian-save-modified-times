@@ -81,6 +81,10 @@ export default class SaveModifiedTimesPlugin extends Plugin {
             callback: () => this.addNoteToExcludedPaths()
         });
 
+        if (this.settings.autoUpdateOnLoad) {
+            await this.autoUpdateModifiedTimes();
+        }
+
         this.registerInterval(window.setInterval(() => {
             void this.checkAutoUpdateTime();
         }, 60 * 1000));
