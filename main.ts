@@ -111,7 +111,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
 
     async autoUpdateModifiedTimes() {
         console.log(`Running auto-update. ${moment().format("HH:mm")}`);
-        this.saveAllModifiedTimesForce(
+        await this.saveAllModifiedTimesForce(
             this.settings.autoUpdateNewFiles,
             this.settings.autoUpdateExistingFiles,
             false
