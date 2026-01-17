@@ -10,6 +10,7 @@ interface PluginSettings {
     excludedPaths: string[];
     autoUpdateTimeEnabled: boolean;
     autoUpdateTime: string;
+    lastAutoUpdateDate: moment.Moment | null;
     autoUpdateExistingFiles: boolean;
     autoUpdateNewFiles: boolean;
     autoUpdateOnLoad: boolean;
@@ -24,6 +25,7 @@ const DEFAULT_SETTINGS: PluginSettings = {
     excludedPaths: [],
     autoUpdateTimeEnabled: false,
     autoUpdateTime: "03:00",
+    lastAutoUpdateDate: null,
     autoUpdateExistingFiles: true,
     autoUpdateNewFiles: true,
     autoUpdateOnLoad: false,
@@ -79,7 +81,35 @@ export default class SaveModifiedTimesPlugin extends Plugin {
             callback: () => this.addNoteToExcludedPaths()
         });
 
+        this.registerInterval(window.setInterval(() => {
+            void this.checkAutoUpdateTime();
+        }, 60 * 1000));
+
         this.addSettingTab(new SettingTab(this.app, this));
+    }
+
+    async checkAutoUpdateTime() {
+        new Notice("Checking auto update time...");
+        if (this.settings.autoUpdateTimeEnabled) {
+            try {
+                const lastUpdate = moment(this.settings.lastAutoUpdateDate ?? 0);
+                const now = moment();
+                const elapsedDays = now.diff(lastUpdate, 'days');
+                const doneTodays = now.isSame(lastUpdate, 'day')
+                    && lastUpdate.format("HH:mm") >= this.settings.autoUpdateTime;
+                if (elapsedDays >= 1
+                    || (!doneTodays && now.format("HH:mm") >= this.settings.autoUpdateTime)) {
+                    this.settings.lastAutoUpdateDate = now;
+                    await this.autoUpdateModifiedTimes();
+                }
+            } catch (e) {
+                new Notice(`${this.manifest.name}\nError checking auto update time: ${e}`);
+            }
+        }
+    }
+
+    async autoUpdateModifiedTimes() {
+        console.log(`Running auto-update. ${moment().format("HH:mm")}`);
     }
 
     async addNoteToExcludedPaths() {
@@ -463,6 +493,9 @@ class SettingTab extends PluginSettingTab {
                 toggle
                     .setValue(this.plugin.settings.autoUpdateTimeEnabled)
                     .onChange(async (value) => {
+                        // Update last auto update date to now to avoid immediate update.
+                        this.plugin.settings.lastAutoUpdateDate = moment();
+
                         this.plugin.settings.autoUpdateTimeEnabled = value;
                         await this.plugin.saveSettings();
                     });
