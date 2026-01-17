@@ -104,12 +104,18 @@ export default class SaveModifiedTimesPlugin extends Plugin {
                 }
             } catch (e) {
                 new Notice(`${this.manifest.name}\nError checking auto update time: ${e}`);
+                console.log(`${this.manifest.name}: Error checking auto update time: ${e}`);
             }
         }
     }
 
     async autoUpdateModifiedTimes() {
         console.log(`Running auto-update. ${moment().format("HH:mm")}`);
+        this.saveAllModifiedTimesForce(
+            this.settings.autoUpdateNewFiles,
+            this.settings.autoUpdateExistingFiles,
+            false
+        );
     }
 
     async addNoteToExcludedPaths() {
@@ -451,15 +457,19 @@ export default class SaveModifiedTimesPlugin extends Plugin {
         }
     }
 
-    async saveAllModifiedTimesForce() {
+    async saveAllModifiedTimesForce(newFiles: boolean = true, existingFiles: boolean = true, showNotice: boolean = true) {
         this.app.vault.getMarkdownFiles().forEach(file => {
-            if (!this.matchesAnyExcludedPath(file)) {
+            const exists = this.settings.modifiedTimes[file.path] !== undefined;
+            if (((exists && existingFiles) || (!exists && newFiles))
+                && !this.matchesAnyExcludedPath(file)) {
                 this.settings.modifiedTimes[file.path] = file.stat.mtime;
             }
         });
 
         await this.saveSettings();
-        new Notice("Saved all notes' modified times.");
+        if (showNotice) {
+            new Notice("Saved all notes' modified times.");
+        }
     }
 
     matchesAnyExcludedPath(file: TFile): boolean {
