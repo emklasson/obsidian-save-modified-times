@@ -93,7 +93,6 @@ export default class SaveModifiedTimesPlugin extends Plugin {
     }
 
     async checkAutoUpdateTime() {
-        new Notice("Checking auto update time...");
         if (this.settings.autoUpdateTimeEnabled) {
             try {
                 const lastUpdate = moment(this.settings.lastAutoUpdateDate ?? 0);
@@ -114,7 +113,6 @@ export default class SaveModifiedTimesPlugin extends Plugin {
     }
 
     async autoUpdateModifiedTimes() {
-        console.log(`Running auto-update. ${moment().format("HH:mm")}`);
         await this.saveAllModifiedTimesForce(
             this.settings.autoUpdateNewFiles,
             this.settings.autoUpdateExistingFiles,
