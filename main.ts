@@ -107,7 +107,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
                 }
             } catch (e) {
                 new Notice(`${this.manifest.name}\nError checking auto update time: ${e}`);
-                console.log(`${this.manifest.name}: Error checking auto update time: ${e}`);
+                console.error(`${this.manifest.name}: Error checking auto update time: ${e}`);
             }
         }
     }
