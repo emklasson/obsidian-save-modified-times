@@ -1,5 +1,8 @@
 # Changelog
 
+- ## 1.3.1 (2026-02-12)
+	- Fixed ReviewBot's complaint.
+
 - ## 1.3.0 (2026-02-12)
 	- Added settings to auto-update saved times on load and/or once a day.
 
