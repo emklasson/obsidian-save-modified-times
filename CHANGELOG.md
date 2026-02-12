@@ -1,10 +1,10 @@
 # Changelog
 
-- ## 1.3.0 (2026-01-17)
-	- Add settings to auto-update saved times on load and/or once a day.
+- ## 1.3.0 (2026-02-12)
+	- Added settings to auto-update saved times on load and/or once a day.
 
 - ## 1.2.1 (2026-01-15)
-	- Fix ReviewBot's UI capitalisation complaints.
+	- Fixed ReviewBot's UI capitalisation complaints.
 
 - ## 1.2.0 (2026-01-13)
 	- Added settings to exclude notes matching certain path prefixes from saving/restoring. Exclusions don't apply when using the commands to save/restore only the current note.
