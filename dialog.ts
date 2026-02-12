@@ -1,5 +1,7 @@
-import { App, Modal, Setting, TextAreaComponent, TextComponent,
-    BaseComponent } from "obsidian";
+import {
+    App, Modal, Setting, TextAreaComponent, TextComponent,
+    BaseComponent, ToggleComponent
+} from "obsidian";
 
 export interface DialogField {
     close?: boolean;
@@ -10,6 +12,8 @@ export interface DialogField {
     key?: string;
     onClick?: (result: DialogData, dialog: Dialog) => void | Promise<void>;
     sameLine?: boolean;
+    setting?: Setting;
+    setValue?: (value: string | boolean) => void;
     text?: string;
     textAlign?: string;
     type?: string;
@@ -61,6 +65,7 @@ export class Dialog extends Modal {
                     .setDesc(desc);
             }
 
+            fields[field].setting = setting;
             fields[field].components = setting.components;
 
             switch (type) {
@@ -120,6 +125,20 @@ export class Dialog extends Modal {
                 });
                 break;
             }
+
+            fields[field].setValue = (value: string | boolean) => {
+                fields[field].value = value;
+                if (fields[field].components) {
+                    const component = fields[field].components[0];
+                    if (component instanceof TextComponent) {
+                        component.setValue(value as string);
+                    } else if (component instanceof TextAreaComponent) {
+                        component.setValue(value as string);
+                    } else if (component instanceof ToggleComponent) {
+                        component.setValue(value as boolean);
+                    }
+                }
+            };
 
             if (props?.textAlign) {
                 setting.infoEl.addClass(`mklasson-align-${props.textAlign}`);
