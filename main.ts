@@ -137,7 +137,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
     }
 
     async loadSettings() {
-        this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+        this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData()) as PluginSettings;
     }
 
     async saveSettings() {
@@ -215,7 +215,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
 
         try {
             let mtime = file.stat.mtime;
-            await this.app.fileManager.processFrontMatter(file, (fm) => {
+            await this.app.fileManager.processFrontMatter(file, (fm: Record<string, number>) => {
                 if (!Object.prototype.hasOwnProperty.call(fm, Properties.SavedModifiedTime)) {
                     new Notice("No last modified time saved. Skipping.");
                     return;
@@ -227,7 +227,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
             });
             await this.app.vault.append(file, "", {mtime: mtime});
         } catch (error) {
-            new Notice(error);
+            new Notice(error as string);
         }
     }
 
@@ -269,14 +269,14 @@ export default class SaveModifiedTimesPlugin extends Plugin {
         try {
             await this.app.fileManager.processFrontMatter(
                 file,
-                (fm) => {
+                (fm: Record<string, number>) => {
                     fm[Properties.SavedModifiedTime] = file.stat.mtime;
                     const date = this.dateStringFromTimestamp(fm[Properties.SavedModifiedTime]);
                     new Notice(`Saved last modified time:\n  [[${file.basename}]]\n  ${date}`);
                 },
                 {mtime: file.stat.mtime});
         } catch (error) {
-            new Notice(error);
+            new Notice(error as string);
         }
     }
 
