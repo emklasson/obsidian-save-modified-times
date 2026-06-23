@@ -190,7 +190,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
                         type: "button",
                         cta: true,
                         sameLine: true,
-                        onClick: async (result: DialogData, dlg: Dialog) => {
+                        onClick: async (_result: DialogData, _dlg: Dialog) => {
                             await this.saveCurrentModifiedTimeForce(file);
                         },
                     },
@@ -254,7 +254,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
                         type: "button",
                         cta: true,
                         sameLine: true,
-                        onClick: async (result: DialogData, dlg: Dialog) => {
+                        onClick: async (_result: DialogData, _dlg: Dialog) => {
                             await this.saveCurrentModifiedTimePropertyForce(file);
                         },
                     },
@@ -319,7 +319,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
             fields["Deselect all"] = {
                 type: "button",
                 close: false,
-                onClick: (result: DialogData, dlg: Dialog) => {
+                onClick: (_result: DialogData, _dlg: Dialog) => {
                     SetAllToggles(false);
                 },
             };
@@ -327,7 +327,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
                 type: "button",
                 sameLine: true,
                 close: false,
-                onClick: (result: DialogData, dlg: Dialog) => {
+                onClick: (_result: DialogData, _dlg: Dialog) => {
                     SetAllToggles(true);
                 },
             };
@@ -336,7 +336,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
                 desc: "Overwrite saved times with current modified times.",
                 cta: true,
                 close: false,
-                onClick: async (result: DialogData, dlg: Dialog) => {
+                onClick: async (_result: DialogData, dlg: Dialog) => {
                     if (this.settings.saveConfirmationRestorePopup) {
                         dialog(
                             this.app,
@@ -352,7 +352,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
                                     type: "button",
                                     cta: true,
                                     sameLine: true,
-                                    onClick: async (result: DialogData, _: Dialog) => {
+                                    onClick: async (_result: DialogData, _: Dialog) => {
                                         await SaveSelectedFiles(this, dlg);
                                     },
                                 },
@@ -372,7 +372,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
                 sameLine: true,
                 cta: true,
                 close: false,
-                onClick: async (result: DialogData, dlg: Dialog) => {
+                onClick: async (_result: DialogData, dlg: Dialog) => {
                     if (await SaveOrRestoreFiles(this, false)) {
                         dlg.close();
                     }
@@ -448,7 +448,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
                         type: "button",
                         cta: true,
                         sameLine: true,
-                        onClick: async (result: DialogData, dlg: Dialog) => {
+                        onClick: async (_result: DialogData, _dlg: Dialog) => {
                             await this.saveAllModifiedTimesForce();
                         },
                     },
@@ -616,7 +616,7 @@ class SettingTab extends PluginSettingTab {
                                             type: "button",
                                             cta: true,
                                             sameLine: true,
-                                            onClick: (result: DialogData, dlg: Dialog) => {
+                                            onClick: (_result: DialogData, dlg: Dialog) => {
                                                 dlg.close();
                                                 this.showMatches(this.plugin.settings.excludedPaths[index], matches);
                                             }
