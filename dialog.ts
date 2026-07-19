@@ -4,11 +4,12 @@ import {
 } from "obsidian";
 
 export interface DialogField {
+    class?: string;  // Custom CSS class to apply. Only for textArea types for now.
     close?: boolean;
     components?: BaseComponent[];
     cta?: boolean;
     desc?: string;
-    height?: string;
+    // height?: string;
     key?: string;
     onClick?: (result: DialogData, dialog: Dialog) => void | Promise<void>;
     sameLine?: boolean;
@@ -74,12 +75,15 @@ export class Dialog extends Modal {
                 setting.controlEl.addClass("mklasson-text-control");
                 setting.setName(field);
                 setting.infoEl.addClass("mklasson-text-info");
-                if (type == "textArea" || props?.height || value.contains("\n")) {
+                if (type == "textArea" /*|| props?.height */|| value.contains("\n")) {
                     setting.addTextArea(textInitialiser);
                     setting.controlEl.querySelector("textarea")?.addClass("mklasson-textarea");
-                    if (props?.height) {
-                        setting.controlEl.querySelector("textarea")?.setCssProps({"height": props.height});
+                    if (props?.class) {
+                        setting.controlEl.querySelector("textarea")?.addClass(props.class);
                     }
+                    // if (props?.height) {
+                    //     setting.controlEl.querySelector("textarea")?.setCssProps({"height": props.height});
+                    // }
                 } else {
                     setting.addText(textInitialiser);
                     setting.controlEl.querySelector("input")?.addClass("mklasson-text-wide");

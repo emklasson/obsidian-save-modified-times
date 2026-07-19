@@ -36,6 +36,10 @@ textarea.mklasson-textarea {
     height: 5rem;
 }
 
+textarea.mklasson-setting-matches {
+    height: 16rem;
+}
+
 .mklasson-setting-error {
     background-color: var(--background-modifier-error) !important;
 }

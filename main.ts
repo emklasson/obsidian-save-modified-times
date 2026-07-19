@@ -1,5 +1,5 @@
 import { Dialog, dialog, DialogData, DialogField } from "dialog";
-import { App, moment, Notice, Plugin, PluginManifest, PluginSettingTab, Setting, TFile, ToggleComponent } from "obsidian";
+import { App, Notice, Plugin, PluginManifest, PluginSettingTab, Setting, TFile, ToggleComponent } from "obsidian";
 
 interface PluginSettings {
     modifiedTimes: Record<string, number>;
@@ -95,8 +95,8 @@ export default class SaveModifiedTimesPlugin extends Plugin {
     async checkAutoUpdateTime() {
         if (this.settings.autoUpdateTimeEnabled) {
             try {
-                const lastUpdate = moment(this.settings.lastAutoUpdateDate ?? 0);
-                const now = moment();
+                const lastUpdate = window.moment(this.settings.lastAutoUpdateDate ?? 0);
+                const now = window.moment();
                 const elapsedDays = now.diff(lastUpdate, 'days');
                 const doneTodays = now.isSame(lastUpdate, 'day')
                     && lastUpdate.format("HH:mm") >= this.settings.autoUpdateTime;
@@ -137,7 +137,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
     }
 
     async loadSettings() {
-        this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+        this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData()) as PluginSettings;
     }
 
     async saveSettings() {
@@ -149,7 +149,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
     }
 
     dateStringFromTimestamp(timestamp: number) {
-        return moment.unix(timestamp / 1000).format("YYYY-MM-DD HH:mm:ss");
+        return window.moment.unix(timestamp / 1000).format("YYYY-MM-DD HH:mm:ss");
     }
 
     async restoreCurrentModifiedTime() {
@@ -190,7 +190,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
                         type: "button",
                         cta: true,
                         sameLine: true,
-                        onClick: async (result: DialogData, dlg: Dialog) => {
+                        onClick: async (_result: DialogData, _dlg: Dialog) => {
                             await this.saveCurrentModifiedTimeForce(file);
                         },
                     },
@@ -215,7 +215,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
 
         try {
             let mtime = file.stat.mtime;
-            await this.app.fileManager.processFrontMatter(file, (fm) => {
+            await this.app.fileManager.processFrontMatter(file, (fm: Record<string, number>) => {
                 if (!Object.prototype.hasOwnProperty.call(fm, Properties.SavedModifiedTime)) {
                     new Notice("No last modified time saved. Skipping.");
                     return;
@@ -227,7 +227,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
             });
             await this.app.vault.append(file, "", {mtime: mtime});
         } catch (error) {
-            new Notice(error);
+            new Notice(error as string);
         }
     }
 
@@ -254,7 +254,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
                         type: "button",
                         cta: true,
                         sameLine: true,
-                        onClick: async (result: DialogData, dlg: Dialog) => {
+                        onClick: async (_result: DialogData, _dlg: Dialog) => {
                             await this.saveCurrentModifiedTimePropertyForce(file);
                         },
                     },
@@ -269,14 +269,14 @@ export default class SaveModifiedTimesPlugin extends Plugin {
         try {
             await this.app.fileManager.processFrontMatter(
                 file,
-                (fm) => {
+                (fm: Record<string, number>) => {
                     fm[Properties.SavedModifiedTime] = file.stat.mtime;
                     const date = this.dateStringFromTimestamp(fm[Properties.SavedModifiedTime]);
                     new Notice(`Saved last modified time:\n  [[${file.basename}]]\n  ${date}`);
                 },
                 {mtime: file.stat.mtime});
         } catch (error) {
-            new Notice(error);
+            new Notice(error as string);
         }
     }
 
@@ -319,7 +319,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
             fields["Deselect all"] = {
                 type: "button",
                 close: false,
-                onClick: (result: DialogData, dlg: Dialog) => {
+                onClick: (_result: DialogData, _dlg: Dialog) => {
                     SetAllToggles(false);
                 },
             };
@@ -327,7 +327,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
                 type: "button",
                 sameLine: true,
                 close: false,
-                onClick: (result: DialogData, dlg: Dialog) => {
+                onClick: (_result: DialogData, _dlg: Dialog) => {
                     SetAllToggles(true);
                 },
             };
@@ -336,7 +336,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
                 desc: "Overwrite saved times with current modified times.",
                 cta: true,
                 close: false,
-                onClick: async (result: DialogData, dlg: Dialog) => {
+                onClick: async (_result: DialogData, dlg: Dialog) => {
                     if (this.settings.saveConfirmationRestorePopup) {
                         dialog(
                             this.app,
@@ -352,7 +352,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
                                     type: "button",
                                     cta: true,
                                     sameLine: true,
-                                    onClick: async (result: DialogData, _: Dialog) => {
+                                    onClick: async (_result: DialogData, _: Dialog) => {
                                         await SaveSelectedFiles(this, dlg);
                                     },
                                 },
@@ -372,7 +372,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
                 sameLine: true,
                 cta: true,
                 close: false,
-                onClick: async (result: DialogData, dlg: Dialog) => {
+                onClick: async (_result: DialogData, dlg: Dialog) => {
                     if (await SaveOrRestoreFiles(this, false)) {
                         dlg.close();
                     }
@@ -448,7 +448,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
                         type: "button",
                         cta: true,
                         sameLine: true,
-                        onClick: async (result: DialogData, dlg: Dialog) => {
+                        onClick: async (_result: DialogData, _dlg: Dialog) => {
                             await this.saveAllModifiedTimesForce();
                         },
                     },
@@ -506,7 +506,7 @@ class SettingTab extends PluginSettingTab {
                     .setValue(this.plugin.settings.autoUpdateTimeEnabled)
                     .onChange(async (value) => {
                         // Update last auto update date to now to avoid immediate update.
-                        this.plugin.settings.lastAutoUpdateDate = moment();
+                        this.plugin.settings.lastAutoUpdateDate = window.moment();
 
                         this.plugin.settings.autoUpdateTimeEnabled = value;
                         await this.plugin.saveSettings();
@@ -616,7 +616,7 @@ class SettingTab extends PluginSettingTab {
                                             type: "button",
                                             cta: true,
                                             sameLine: true,
-                                            onClick: (result: DialogData, dlg: Dialog) => {
+                                            onClick: (_result: DialogData, dlg: Dialog) => {
                                                 dlg.close();
                                                 this.showMatches(this.plugin.settings.excludedPaths[index], matches);
                                             }
@@ -705,7 +705,7 @@ class SettingTab extends PluginSettingTab {
         } else {
             fields[`${matches.length} matches`] = {
                 type: "textArea",
-                height: "20em",
+                class: "mklasson-setting-matches",
                 text: matches.map(file => file.path).join('\n'),
             };
         }
