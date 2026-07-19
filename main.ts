@@ -1,5 +1,5 @@
 import { Dialog, dialog, DialogData, DialogField } from "dialog";
-import { App, moment, Notice, Plugin, PluginManifest, PluginSettingTab, Setting, TFile, ToggleComponent } from "obsidian";
+import { App, Notice, Plugin, PluginManifest, PluginSettingTab, Setting, TFile, ToggleComponent } from "obsidian";
 
 interface PluginSettings {
     modifiedTimes: Record<string, number>;
@@ -95,8 +95,8 @@ export default class SaveModifiedTimesPlugin extends Plugin {
     async checkAutoUpdateTime() {
         if (this.settings.autoUpdateTimeEnabled) {
             try {
-                const lastUpdate = moment(this.settings.lastAutoUpdateDate ?? 0);
-                const now = moment();
+                const lastUpdate = window.moment(this.settings.lastAutoUpdateDate ?? 0);
+                const now = window.moment();
                 const elapsedDays = now.diff(lastUpdate, 'days');
                 const doneTodays = now.isSame(lastUpdate, 'day')
                     && lastUpdate.format("HH:mm") >= this.settings.autoUpdateTime;
@@ -149,7 +149,7 @@ export default class SaveModifiedTimesPlugin extends Plugin {
     }
 
     dateStringFromTimestamp(timestamp: number) {
-        return moment.unix(timestamp / 1000).format("YYYY-MM-DD HH:mm:ss");
+        return window.moment.unix(timestamp / 1000).format("YYYY-MM-DD HH:mm:ss");
     }
 
     async restoreCurrentModifiedTime() {
@@ -506,7 +506,7 @@ class SettingTab extends PluginSettingTab {
                     .setValue(this.plugin.settings.autoUpdateTimeEnabled)
                     .onChange(async (value) => {
                         // Update last auto update date to now to avoid immediate update.
-                        this.plugin.settings.lastAutoUpdateDate = moment();
+                        this.plugin.settings.lastAutoUpdateDate = window.moment();
 
                         this.plugin.settings.autoUpdateTimeEnabled = value;
                         await this.plugin.saveSettings();
