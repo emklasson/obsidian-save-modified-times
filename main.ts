@@ -705,7 +705,7 @@ class SettingTab extends PluginSettingTab {
         } else {
             fields[`${matches.length} matches`] = {
                 type: "textArea",
-                height: "20em",
+                class: "mklasson-setting-matches",
                 text: matches.map(file => file.path).join('\n'),
             };
         }
