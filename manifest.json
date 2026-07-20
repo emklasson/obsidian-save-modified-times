@@ -3,7 +3,7 @@
 	"name": "Save Modified Times",
 	"version": "1.3.2",
 	"minAppVersion": "1.5.7",
-	"description": "Save and restore notes' last modified times (mtime).",
+	"description": "Save and restore notes' last modified times/dates (mtime).",
 	"author": "Mikael Klasson",
 	"authorUrl": "https://github.com/emklasson",
 	"isDesktopOnly": false
